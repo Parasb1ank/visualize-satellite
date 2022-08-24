@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+{% for sat in sats %}    
+    <div id="{{ sat.id}}">{{ sat.name }}<br>{{sat.line1}}<br>{{sat.line2}}</div>        
+
+    {% endfor %}
+
+    {% endblock %}
