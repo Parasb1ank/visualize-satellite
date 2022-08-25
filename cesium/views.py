@@ -6,15 +6,14 @@ import requests
 
 def form(request,sat_id):
     data = requests.api.get(f"https://tle-backend.herokuapp.com/tlebyid/{sat_id}/").json()
-    sat_rec = Satellite(id=f"{sat_id}",name=data["name"],line1=data["line1"],line2=data["line2"])
-    sat_rec.save()
 
     return HttpResponseRedirect(f"/cesium/visualize/{sat_id}")
 
 def sat(request,sat_id):
-    satrec = Satellite.objects.get(id=f'{sat_id}')
+    data = requests.api.get(f"https://tle-backend.herokuapp.com/tlebyid/{sat_id}/").json()
 
-    return render(request, 'current_position.html', { "line1": satrec.line1, "line2": satrec.line2,"sat_name": satrec.name  })
+
+    return render(request, 'current_position.html', { "line1": data["line1"], "line2": data["line2"],"sat_name": data["name"]  })
 
 def satellites(request):
     sats = Satellite.objects.all()
@@ -24,8 +23,6 @@ def satellites(request):
 def visualize(request,sat_id):
 
     data = requests.api.get(f"https://tle-backend.herokuapp.com/tlebyid/{sat_id}/").json()
-    sat_rec = Satellite(id=f"{sat_id}",name=data["name"],line1=data["line1"],line2=data["line2"])
-    sat_rec.save()
 
     single_tle_list = [[ data["name"],data["line1"],data["line2"], ]]
 
