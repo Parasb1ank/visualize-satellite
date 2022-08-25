@@ -1,39 +1,34 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
 
-{% block content %}
-  
+<div id="cesiumContainer">
   <div id="long"></div>
   <div id="lat"></div>
   <div id="toolbar"></div>
-  <div id="cesiumContainer"></div>
+</div>
 
-  
-  <script >
+<script>
+  Cesium.Ion.defaultAccessToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1ZjVhNTE1NS04MTFiLTQwMTgtYWJjMy1iNjY0NDI0Mzk5MzgiLCJpZCI6MTA0MjA3LCJpYXQiOjE2NjAwNDk0NTZ9.gWfuJ2NgZcnTgM0_G-XMccqU-iWIUejCQyCQxwH0_Wo";
 
-Cesium.Ion.defaultAccessToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1ZjVhNTE1NS04MTFiLTQwMTgtYWJjMy1iNjY0NDI0Mzk5MzgiLCJpZCI6MTA0MjA3LCJpYXQiOjE2NjAwNDk0NTZ9.gWfuJ2NgZcnTgM0_G-XMccqU-iWIUejCQyCQxwH0_Wo";
+  // Create cesium viewer
+  const viewer = new Cesium.Viewer("cesiumContainer", {
+    scene3DOnly: false,
+    selectionIndicator: false,
+    baseLayerPicker: true,
+    shouldAnimate: true,
+  });
 
+  // Enable lighting based on sun/moon position
+  viewer.scene.globe.enableLighting = true;
 
-// Create cesium viewer
-const viewer = new Cesium.Viewer('cesiumContainer', {
-  scene3DOnly: false,
-  selectionIndicator: false,
-  baseLayerPicker: true,
-  shouldAnimate: true,
-});
+  // Given location (lat,long)
+  let my_position = [
+    77.2217831, // Latitude
+    28.6862738, // Longitude
+  ];
 
-// Enable lighting based on sun/moon position
-viewer.scene.globe.enableLighting = true;
-
-// Given location (lat,long)
-let my_position = [
-  77.2217831, // Latitude
-  28.6862738, // Longitude
-]
-
-
-// Draw given location on the model
-/*var GroundStation = viewer.entities.add({
+  // Draw given location on the model
+  /*var GroundStation = viewer.entities.add({
   name: "Given Location",
   position: Cesium.Cartesian3.fromDegrees(my_position[0],my_position[1]),
   point: {
@@ -52,116 +47,137 @@ let my_position = [
   }
 })*/
 
-// Camera point to given location
-viewer.camera.flyTo({
-  destination: Cesium.Cartesian3.fromDegrees(my_position[0],my_position[1], 1000*10000)
-})
+  // Camera point to given location
 
-// Satellite CZML file loaded
-Cesium.CzmlDataSource.load("/static/data.czml").then( (data) => {
-  viewer.dataSources.add(data).then((data1) => {
-  })
-})
+  // Satellite CZML file loaded
+  Cesium.CzmlDataSource.load("/static/data.czml").then((data) => {
+    viewer.dataSources.add(data).then((data1) => {});
+  });
 
-// Execute below code after necessary files are loaded in browser
-function showfootprint() {
-  var clock = viewer.clock
-  var ec = viewer.dataSources._dataSources[0]._entityCollection;
-  var sat = ec.getById("{{ sat_id }}")
-  console.log(sat)
-  var cartesian = sat.position.getValue(clock.currentTime);
-  var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+  function showfootprint() {
+  
+  }
 
-  var longitude = Cesium.Math.toDegrees(cartographic.longitude)
-  var latitude = Cesium.Math.toDegrees(cartographic.latitude)
-  var height = cartographic.height
+  // Execute below code after necessary files are loaded in browser
+i/*  function showfootprint() {
+    var clock = viewer.clock;
+    var ec = viewer.dataSources._dataSources[0]._entityCollection;
+    var sat = ec.getById("{{ sat_id }}");
+    console.log(sat);
+    var cartesian = sat.position.getValue(clock.currentTime);
+    var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
 
+    var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+    var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+    var height = cartographic.height;
 
-  // Updates cone to be drawn with satellite positions
-  setInterval(function() {
-    viewer.entities.removeById("redcone"); // to delte previous cone after it is updated with new location
-   // var satLocation = new Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
-   // var groundPoint = new Cesium.Cartesian3.fromDegrees(longitude, latitude, 0.0);
+    // Updates cone to be drawn with satellite positions
+    setInterval(function () {
+      viewer.entities.removeById("redcone"); // to delte previous cone after it is updated with new location
+      // var satLocation = new Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
+      // var groundPoint = new Cesium.Cartesian3.fromDegrees(longitude, latitude, 0.0);
 
-    var instrumentFOV = 760 * 1000; // swath-width
+      var instrumentFOV = 760 * 1000; // swath-width
 
-    // Coordinates of satellite at given or current time
-    cartesian = sat.position.getValue(clock.currentTime);
-    cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-    longitude = Cesium.Math.toDegrees(cartographic.longitude);
-    latitude = Cesium.Math.toDegrees(cartographic.latitude);
-    height = cartographic.height;
+      // Coordinates of satellite at given or current time
+      cartesian = sat.position.getValue(clock.currentTime);
+      cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+      longitude = Cesium.Math.toDegrees(cartographic.longitude);
+      latitude = Cesium.Math.toDegrees(cartographic.latitude);
+      height = cartographic.height;
 
-    // draws footprint of satellite based on its swath width of its instrument along the ground
-    var redCone = viewer.entities.add({
-      id: "redcone",
-        name : 'Red cone',
-        position: Cesium.Cartesian3.fromDegrees(longitude, latitude, height/2),
-        cylinder : {
-            length : height,
-            topRadius : 0.0,
-            bottomRadius : instrumentFOV / 2,
-            material : Cesium.Color.YELLOWGREEN,
-            outline: true,
-            outlineColor: Cesium.Color.RED.withAlpha(0.5)
-        }
-    });
+      // draws footprint of satellite based on its swath width of its instrument along the ground
+      var redCone = viewer.entities.add({
+        id: "redcone",
+        name: "Red cone",
+        position: Cesium.Cartesian3.fromDegrees(
+          longitude,
+          latitude,
+          height / 2
+        ),
+        cylinder: {
+          length: height,
+          topRadius: 0.0,
+          bottomRadius: instrumentFOV / 2,
+          material: Cesium.Color.YELLOWGREEN,
+          outline: true,
+          outlineColor: Cesium.Color.RED.withAlpha(0.5),
+        },
+      });
+    }, 1 * 1000); // Updates every 1 seconds
+  } // Starts after 30 seconds of running on browser*/
 
-  }, 1*1000);	// Updates every 1 seconds
+  var clock = viewer.clock;
+  var scene = viewer.scene;
+  var globe = scene.globe;
+  var ellipsoid = scene.globe.ellipsoid;
+  var primitives = scene.primitives;
+  var handler;
 
-} // Starts after 30 seconds of running on browser
+  Sandcastle.addToolbarButton("Select Location", function () {
+    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 
-var clock = viewer.clock;
-var scene = viewer.scene;
-var globe = scene.globe;
-var ellipsoid = scene.globe.ellipsoid;
-var primitives = scene.primitives;	
-var handler;
+    handler.setInputAction(function (click) {
+      var cartesian = viewer.camera.pickEllipsoid(
+        click.position,
+        scene.globe.ellipsoid
+      );
 
-Sandcastle.addToolbarButton('Select Location', function(){
-	handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+      if (cartesian) {
+        var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
 
-	handler.setInputAction(function(click) {
-		var cartesian = viewer.camera.pickEllipsoid(click.position, scene.globe.ellipsoid);
+        var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+        var latitude = Cesium.Math.toDegrees(cartographic.latitude);
 
-        if (cartesian) {
-            var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+        document.getElementById("long").value = longitude;
+        document.getElementById("lat").value = latitude;
 
-			var longitude = Cesium.Math.toDegrees(cartographic.longitude);
-            var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+        viewer.entities.add({
+          position: Cesium.Cartesian3.fromDegrees(longitude, latitude),
+          point: {
+            pixelSize: 3,
+            color: Cesium.Color.YELLOW,
+          },
+          label: {
+            text: "Ground Station",
+            font: "14pt monospace",
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            outlineWidth: 2,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            pixelOffset: new Cesium.Cartesian2(0, -9),
+          },
+        });
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(
+            longitude,
+            latitude,
+            10000 * 1000
+          ),
+        });
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+  });
 
-            document.getElementById("long").value = longitude;
-            document.getElementById("lat").value = latitude;
+  $("#toolbar > .cesium-button").prop("title", "Select Location for Query");
 
-			viewer.entities.add({
-				position : Cesium.Cartesian3.fromDegrees(longitude, latitude),
-				point : {
-					pixelSize : 3,
-					color : Cesium.Color.YELLOW
-				},
-                label: {
-                  text: "Ground Station",
-                  font: "14pt monospace",
-                  style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                  outlineWidth: 2,
-                  verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                  pixelOffset: new Cesium.Cartesian2(0,-9)
-			    },
-           } ); }
-	}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-  }); 
+  Sandcastle.addToolbarButton("Reset", function () {
+    viewer.entities.removeAll();
+  });
 
-$('#toolbar > .cesium-button').prop('title',"Select Location for Query")
+  Sandcastle.addToolbarButton("Show Footprint", showfootprint);
 
+  // To create an entity directly
+  var entityCollection = new Cesium.EntityCollection();
 
-Sandcastle.addToolbarButton('Reset', function() {
-  viewer.entities.removeAll()
-})
+  var entity = entityCollection.getOrCreateEntity("test");
+  entity.addProperty("conicSensor");
 
-Sandcastle.addToolbarButton('Show Footprint', showfootprint);
+  // configure other entity properties, e.g. position and orientation...
 
-  </script>
-
+  entity.conicSensor = new CesiumSensorVolumes.ConicSensorGraphics();
+  entity.conicSensor.intersectionColor = new Cesium.ConstantProperty(
+    new Cesium.Color(0.1, 0.2, 0.3, 0.4)
+  );
+</script>
 
 {% endblock %}
-

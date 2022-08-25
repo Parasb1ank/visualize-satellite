@@ -12,10 +12,10 @@
     const satrec = satellite.twoline2satrec(
         '{{ line1  }}', '{{ line2  }}'
     );
-const date = new Date();
-const positionAndVelocity = satellite.propagate(satrec,date);
-const gmst = satellite.gstime(date);
-const position = satellite.eciToGeodetic(positionAndVelocity.position ,gmst)
+var date = new Date();
+var positionAndVelocity = satellite.propagate(satrec,date);
+var gmst = satellite.gstime(date);
+var position = satellite.eciToGeodetic(positionAndVelocity.position ,gmst)
 
 console.log(position.longitude);
 console.log(position.latitude);
@@ -24,6 +24,7 @@ console.log(satrec)
 $("#lat").text(`Latitude - ${position.latitude}`)
 $("#long").text(`Longitude - ${position.longitude}`)
 $("#hei").text(`Height - ${position.height}`)
+
 
 
 </script>
