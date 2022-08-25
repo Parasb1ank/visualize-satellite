@@ -4,21 +4,17 @@ import requests
 
 
 def sat(request,sat_id):
-    data = requests.api.get(f'https://celestrak.org/NORAD/elements/gp.php?CATNR={sat_id}').text
-    data = data.splitlines()
-    data = [ d.strip() for d in data]
+    data = requests.api.get(f'https://celestark.herokuapp.com/tlebyid/{sat_id}').json()
 
 
-    return render(request, 'current_position.html', { "line1": data[1], "line2": data[2],"sat_name": data[0]  })
+    return render(request, 'current_position.html', { "line1": data["line1"], "line2": data["line2"],"sat_name": data["name"]  })
 
 
 def visualize(request,sat_id):
 
-    data = requests.api.get(f'https://celestrak.org/NORAD/elements/gp.php?CATNR={sat_id}').text
-    data = data.splitlines()
-    data = [ d.strip() for d in data]
+    data = requests.api.get(f'https://celestark.herokuapp.com/tlebyid/{sat_id}').json()
 
-    single_tle_list = [ data ]
+    single_tle_list = [ [data["name"],data["line1"], data["line2"]  ] ]
 
     czml_string = satellite_czml(tle_list=single_tle_list).get_czml()
     open("cesium/static/data.czml",'w').write(czml_string)
