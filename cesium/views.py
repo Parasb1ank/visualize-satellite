@@ -1,30 +1,24 @@
 from django.shortcuts import HttpResponseRedirect, render
-from .models import Satellite
 from satellite_czml import satellite_czml
 import requests
 
 
-def form(request,sat_id):
-    data = requests.api.get(f"https://tle-backend.herokuapp.com/tlebyid/{sat_id}/").json()
-
-    return HttpResponseRedirect(f"/cesium/visualize/{sat_id}")
-
 def sat(request,sat_id):
-    data = requests.api.get(f"https://tle-backend.herokuapp.com/tlebyid/{sat_id}/").json()
+    data = requests.api.get(f'https://celestrak.org/NORAD/elements/gp.php?CATNR={sat_id}').text
+    data = data.splitlines()
+    data = [ d.strip() for d in data]
 
 
-    return render(request, 'current_position.html', { "line1": data["line1"], "line2": data["line2"],"sat_name": data["name"]  })
+    return render(request, 'current_position.html', { "line1": data[1], "line2": data[2],"sat_name": data[0]  })
 
-def satellites(request):
-    sats = Satellite.objects.all()
-
-    return render(request, 'sat.html', { "sats" :sats  })
 
 def visualize(request,sat_id):
 
-    data = requests.api.get(f"https://tle-backend.herokuapp.com/tlebyid/{sat_id}/").json()
+    data = requests.api.get(f'https://celestrak.org/NORAD/elements/gp.php?CATNR={sat_id}').text
+    data = data.splitlines()
+    data = [ d.strip() for d in data]
 
-    single_tle_list = [[ data["name"],data["line1"],data["line2"], ]]
+    single_tle_list = [ data ]
 
     czml_string = satellite_czml(tle_list=single_tle_list).get_czml()
     open("cesium/static/data.czml",'w').write(czml_string)
