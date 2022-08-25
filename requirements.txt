@@ -20,3 +20,4 @@ six==1.16.0
 spacetrack==0.16.0
 sqlparse==0.4.2
 urllib3==1.26.11
+whitenoise==6.2.0
