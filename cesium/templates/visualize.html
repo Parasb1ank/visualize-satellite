@@ -51,7 +51,9 @@
 
   // Satellite CZML file loaded
   Cesium.CzmlDataSource.load("/static/data.czml").then((data) => {
-    viewer.dataSources.add(data).then((data1) => {});
+    viewer.dataSources.add(data).then((data1) => { 
+      viewer.clock.multiplier = 10
+    });
   });
 
   function showfootprint() {
@@ -166,18 +168,6 @@ i/*  function showfootprint() {
 
   Sandcastle.addToolbarButton("Show Footprint", showfootprint);
 
-  // To create an entity directly
-  var entityCollection = new Cesium.EntityCollection();
-
-  var entity = entityCollection.getOrCreateEntity("test");
-  entity.addProperty("conicSensor");
-
-  // configure other entity properties, e.g. position and orientation...
-
-  entity.conicSensor = new CesiumSensorVolumes.ConicSensorGraphics();
-  entity.conicSensor.intersectionColor = new Cesium.ConstantProperty(
-    new Cesium.Color(0.1, 0.2, 0.3, 0.4)
-  );
 </script>
 
 {% endblock %}
