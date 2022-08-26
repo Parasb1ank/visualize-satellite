@@ -1,13 +1,13 @@
 {% extends 'base.html' %} {% block content %}
 
-<div id="latitude"></div>
-<div id="longitude"></div>
-
 
 <div id="cesiumContainer">
   <div id="long"></div>
   <div id="lat"></div>
   <div id="toolbar"></div>
+
+<div id="latitude"></div>
+<div id="longitude"></div>
 </div>
 
 <script>
@@ -65,7 +65,7 @@
   }
 
   // Execute below code after necessary files are loaded in browser
-i/*  function showfootprint() {
+/*  function showfootprint() {
     var clock = viewer.clock;
     var ec = viewer.dataSources._dataSources[0]._entityCollection;
     var sat = ec.getById("{{ sat_id }}");
@@ -182,8 +182,9 @@ i/*  function showfootprint() {
    var longitude = Cesium.Math.toDegrees(cartographic.longitude);
    var latitude = Cesium.Math.toDegrees(cartographic.latitude);
    var height = cartographic.height;
-   $("#latitude").text = latitude
-   $("#longitude").text = latitude
+   console.log(longitude,latitude)
+   $("#latitude").contents = latitude
+   $("#longitude").contents = longitude
 
  }, 1*1000)
 
