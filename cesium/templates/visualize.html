@@ -183,7 +183,7 @@
    var latitude = Cesium.Math.toDegrees(cartographic.latitude);
    var height = cartographic.height;
    console.log(longitude,latitude)
-   $("#latitude").contents = latitude
+   document.getElementById("latitude").text = latitude
    $("#longitude").contents = longitude
 
  }, 1*1000)
