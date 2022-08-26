@@ -1,5 +1,9 @@
 {% extends 'base.html' %} {% block content %}
 
+<div id="latitude"></div>
+<div id="longitude"></div>
+
+
 <div id="cesiumContainer">
   <div id="long"></div>
   <div id="lat"></div>
@@ -167,6 +171,21 @@ i/*  function showfootprint() {
   });
 
   Sandcastle.addToolbarButton("Show Footprint", showfootprint);
+
+
+ setInterval( () => {
+    var ec = viewer.dataSources._dataSources[0]._entityCollection;
+    var sat = ec.getById("{{ sat_id }}");
+   // Coordinates of satellite at given or current time
+   var cartesian = sat.position.getValue(clock.currentTime);
+   var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+   var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+   var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+   var height = cartographic.height;
+   $("#latitude").text = latitude
+   $("#longitude").text = latitude
+
+ }, 1*1000)
 
 </script>
 

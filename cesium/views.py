@@ -1,14 +1,19 @@
 from django.shortcuts import HttpResponseRedirect, render
-from satellite_czml import satellite_czml
+from satellite_czml import satellite, satellite_czml
 import requests
-
+from skyfield.api import EarthSatellite,load,wgs84
 
 def sat(request,sat_id):
     data = requests.api.get(f'https://celestrak.org/NORAD/elements/gp.php?CATNR={sat_id}').text
     data = data.splitlines()
     data = [ d.strip() for d in data]
-
-    return render(request, 'current_position.html', { "line1": data[1], "line2": data[2],"sat_name": data[0]  })
+    
+    ts = load.timescale()
+    satellite = EarthSatellite(name=data[0],line1=data[1],line2=data[2],ts=ts)
+    t = ts.now()
+    geocentric = satellite.at(t)
+    lat,lon = wgs84.latlon_of(geocentric)
+    return render(request, 'current_position.html', { "line1": data[1], "line2": data[2],"sat_name": data[0],"lat":lat,"lon": lon  })
 
 
 def visualize(request,sat_id):
