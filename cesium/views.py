@@ -1,3 +1,4 @@
+import numpy as np
 from django.shortcuts import HttpResponseRedirect, render
 from satellite_czml import satellite, satellite_czml
 import requests
@@ -27,6 +28,9 @@ def visualize(request,sat_id):
 
     czml_string = satellite_czml(tle_list=single_tle_list).get_czml()
     open("cesium/static/data.czml",'w').write(czml_string)
+
+
+
 
     return render(request, 'visualize.html',{ "sat_id": sat_id } )
 
